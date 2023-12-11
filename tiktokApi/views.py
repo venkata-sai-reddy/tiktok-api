@@ -33,9 +33,6 @@ videos = {"data" : [
         "url":"https://www.tiktok.com/embed/7189033051341524270"
     },
     {
-        "yId": "0anNjcmfS0E"
-    },
-    {
         "create_time": 1673827199,
         "hashtag_names": [],
         "like_count": 41,

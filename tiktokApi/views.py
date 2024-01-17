@@ -1,129 +1,88 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework import serializers
+import requests
+from rest_framework import generics
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import VideoInfo, HashtagInfo
+import pandas as pd
 
-videos = {"data" : [
-    {
-        "hashtag_names": [
-            "model",
-            "fashion",
-            "luxury",
-            "lamborghini",
-            "fyp",
-            "supermodel",
-            "luxurylifestyle",
-            "hermes",
-            "luxurylife",
-            "luxurygirl",
-            "luxuryliving",
-            "hermesbirkin",
-            "hermeskelly",
-            "luxurybag"
-        ],
-        "id": 7189033051341524270,
-        "region_code": "US",
-        "share_count": 0,
-        "username": "luxurylife84",
-        "comment_count": 0,
-        "like_count": 9,
-        "music_id": 7174260137358641966,
-        "video_description": "Hermes Kelly #luxury #luxurylife #luxurylifestyle #luxurygirl #luxuryliving #supermodel #luxurybag #model #fashion #lamborghini #hermeskelly #hermes #hermesbirkin #fyp ",
-        "view_count": 32,
-        "create_time": 1673827199,
-        "url":"https://www.tiktok.com/embed/7189033051341524270"
-    },
-    {
-        "create_time": 1673827199,
-        "hashtag_names": [],
-        "like_count": 41,
-        "music_id": 6956008818153114374,
-        "share_count": 0,
-        "video_description": "",
-        "view_count": 2,
-        "comment_count": 1,
-        "region_code": "US",
-        "username": "_that_camaro_15ls_",
-        "id": 7189033042432806186,
-        "url":"https://www.tiktok.com/embed/7189033042432806186"
-    },
-    {
-        "comment_count": 3,
-        "hashtag_names": [],
-        "share_count": 0,
-        "username": "nicmallars",
-        "region_code": "US",
-        "video_description": "I love you all fr ",
-        "view_count": 5,
-        "create_time": 1673827199,
-        "id": 7189033041338076458,
-        "like_count": 23,
-        "music_id": 7189033046358625066,
-        "url":"https://www.tiktok.com/embed/7189033041338076458"
-    },
-    {
-        "view_count": 92,
-        "comment_count": 12,
-        "like_count": 41,
-        "region_code": "US",
-        "video_description": "#duet with @evankriel #newbeginnings it can be difficult to take that first step into public ministry, but when you do, a whole new world opens up.  #God #Jesus  #Christian #Bible #Love #inspirational ",
-        "share_count": 1,
-        "username": "zahamaru",
-        "create_time": 1673827198,
-        "hashtag_names": [
-            "love",
-            "god",
-            "bible",
-            "jesus",
-            "inspirational",
-            "duet",
-            "christian",
-            "newbeginnings"
-        ],
-        "id": 7189033041006890286,
-        "music_id": 6786896889338923009,
-        "url":"https://www.tiktok.com/embed/7189033041006890286"
-    },
-    {
-        "like_count": 5,
-        "music_id": 7189033026553236266,
-        "region_code": "US",
-        "view_count": 5,
-        "comment_count": 1,
-        "hashtag_names": [],
-        "share_count": 0,
-        "username": "timwiles961",
-        "video_description": "live at hoots pub Amarillo 1/15/23. I do not own the rights to this song. ",
-        "create_time": 1673827197,
-        "id": 7189033041006759214,
-        "url":"https://www.tiktok.com/embed/7189033041006759214"
-    },
-    {
-        "comment_count": 0,
-        "hashtag_names": [
-            "plants",
-            "plantlover",
-            "plantsoftiktok",
-            "micans",
-            "planttok",
-            "propegation",
-            "propegationsong",
-            "micanpropegation"
-        ],
-        "region_code": "US",
-        "share_count": 0,
-        "username": "houseplantingmama",
-        "video_description": "Micans propagation.  #propegation #plantlover #micans #plants #planttok #plantsoftiktok #propegationsong #micanpropegation ",
-        "view_count": 95,
-        "create_time": 1673827199,
-        "id": 7189033039643675946,
-        "like_count": 65,
-        "music_id": 6970430816019024646,
-        "url":"https://www.tiktok.com/embed/7189033039643675946"
+
+"""
+Connect to Oembed tiktok API to fetch the blockquote for UI
+"""
+def get_oembed_html(request, video_info):
+    api_url = "https://www.tiktok.com/oembed"
+    params = {
+        'url': f"https://www.tiktok.com/@{video_info['user_name']}/video/{video_info['video_id']}"
     }
-]}
+    try:
+        print(params['url'])
+        response = requests.get(api_url, params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return None
 
-def list_videos(request):
-    return render(request, 'videos.html', videos)
 
-def videos_data(request):
-    return JsonResponse(videos)
+"""
+Create an Video object to send to the UI 
+If the Oembed Fails then create an custom blockquote
+"""
+def create_video_info_dict(video_info, embed_data):
+    return {
+        'video_id': video_info['video_id'],
+        'description': video_info['description'],
+        'user_name': video_info['user_name'],
+        'region_code': video_info['region_code'],
+        'create_time': video_info['create_time'],
+        'music_id': video_info['music_id'],
+        'duration': video_info['duration'],
+        'html': embed_data['html'] if embed_data else f"<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@{video_info['user_name']}/video/{video_info['video_id']}\" data-video-id=\"{video_info['video_id']}\" data-embed-from=\"oembed\" style=\"max-width: 605px;min-width: 325px;\" > <section> <a target=\"_blank\" title=\"@{video_info['user_name']}\" href=\"https://www.tiktok.com/@{video_info['user_name']}?refer=embed\">@{video_info['user_name']}</a> <p>{video_info['description']}</p> <a target=\"_blank\" title=\" original sound - {video_info['user_name']}\" href=\"https://www.tiktok.com/music/original-sound-{video_info['music_id']}?refer=embed\"> original sound - {video_info['user_name']}</a> </section> </blockquote>",  
+    }
+
+"""
+Retrieve All the Video Information from the database
+"""
+def get_video_info(request):
+    video_info_objects = VideoInfo.objects.values()[:2]
+    video_info_data = []
+
+    for video_info in video_info_objects:
+        # Retrieve blockquote from oembed
+        embed_data = get_oembed_html(request, video_info)
+        video_info_data.append(create_video_info_dict(video_info, embed_data))
+
+    return JsonResponse(video_info_data, safe=False)  
+
+"""
+Retrieve All the Video Information from the database
+"""
+def save_hashtags(request):
+    
+    hashtags_data = ["adventure", "alt", "balloonartist", "balloondecor", "basketball", "bookish", "bookrecommendations", "bookworm", "bouquet", "camping", "candle", "case", "catlover", "catsoftiktok", "chef", "chevy", "christmas2023", "christmasdecor", "christmasgift", "christmaslights", "christmasphotoshoot", "christmastiktok", "christmastree", "clearaligners", "cod", "cold", "construction", "coquette", "cup", "dadsoftiktok", "dentalimplants", "drone", "elf", "enhypen", "familytime", "foodreview", "ford", "forex", "forexlifestyle", "forextrading", "fortniteclips", "gift", "giftwrapping", "gingerbreadhouse", "grandparents", "grinch", "headphones", "hockey", "holiday", "holidays", "invisalign", "jjk", "journalwithme", "jujutsukaisen", "kanyewesr", "lashes", "laskeyesurgery", "lyrics", "mealprep", "miami", "mining", "momof1", "multivitamin", "mustang", "nailtech", "naturalhair", "nba", "ocean", "partyideas", "petsoftiktok", "phonecase", "pink", "planner", "porsche", "puppy", "ramobuchon", "reading", "restaurant", "santababy", "Shopping", "stanley", "stanleycup", "stationary", "sturniolotriplets", "taxes", "technology", "timeflies", "Toddlertok", "trucktok", "warzone"]
+
+    for hashtag_name in hashtags_data:
+        hashtag = HashtagInfo.objects.create(hashtag_name = hashtag_name)
+
+    return JsonResponse(True, safe=False)  
+
+class UploadCSV(APIView):
+    parser_classes = (FileUploadParser,)
+
+    def post(self, request, *args, **kwargs):
+        if 'file' not in request.data:
+            return Response({'error': 'No file provided'}, status=400)
+        
+        file = request.FILES.get('file')
+        csv_file = request.data['file']
+        df = pd.read_csv(csv_file)
+
+        # YourModel.objects.bulk_create(
+        #     [YourModel(**row) for row in df.to_dict(orient='records')]
+        # )
+
+        return Response({'message': 'CSV data uploaded successfully'})

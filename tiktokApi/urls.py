@@ -1,9 +1,14 @@
 from django.urls import path
-from . import views
+from rest_framework import routers
+from .views import VideoViewSet, ParticipantViewSet, SessionViewSet, DataFileUpload
 
-urlpatterns = [
-    path('api/videos/', views.get_video_info, name='video-list'),
-    path('save/hashtags', views.save_hashtags, name='upload_hashtags'),
-    # path('save/hashtags_map', views.save_hashtags_map, name='update_hashtag_map'),
-    path('save/upload-csv/', views.UploadCSV.as_view(), name='upload-hashtag-map-csv')
+router = routers.DefaultRouter()
+router.register(r'videos', VideoViewSet, basename='video_list')
+router.register(r'participant', ParticipantViewSet, basename='participants')
+router.register(r'session', SessionViewSet, basename='video_list')
+urlpatterns = router.urls
+
+urlpatterns += [
+    path('save/data-upload/', DataFileUpload.as_view(), name='video-data-csv'),
+
 ]

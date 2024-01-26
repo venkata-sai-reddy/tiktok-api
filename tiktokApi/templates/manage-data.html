@@ -1,0 +1,87 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Data</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: white;
+            height: max-content;
+            width: max-content;
+            border: 3px solid darkblue;
+            margin: 15px auto;
+            padding: 15px;
+        }
+        h2 {
+            color: black;
+            text-align: center;
+            margin: 15px;
+        } 
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .response {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            color: #4caf50;
+            background-color: #dff0d8;
+        }
+        .error {
+            color: #a94442;
+            background-color: #f2dede;
+        }
+        .delete_button {
+            padding: 10px;
+            background-color: #a94442;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .delete_button:hover {
+            background-color: #a90e0c;
+        }
+    </style>
+</head>
+<body>
+    <h2>Manage Data</h2>
+    {% if message %}
+        <div>
+            {% if status == 'success' %}
+                <script>alert(message)</script>
+                <p style="color: green;">{{ message }}</p>
+            {% elif status == 'error' %}
+                <p style="color: red;">{{ message }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="file_name">
+        {% csrf_token %}
+        <button type="submit">Upload CSV</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button class="delete_button" type="submit" name="delete_all" onclick="return confirm('Are you sure you want to delete all records?')">Delete Data</button>
+    </form>
+
+</body>
+</html>

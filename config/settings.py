@@ -25,7 +25,8 @@ SECRET_KEY = "django-insecure-+^8grw88rtdsncbd6y5kw&1gwu-_b=k37!3()@$v#_ne&8lcg0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['140.232.174.181', '24.240.132.86', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,7 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'corsheaders',
     "tiktokApi",
-    'rest_framework'
+    'rest_framework',
+    'django.contrib.sessions'
 ]
 
 MIDDLEWARE = [
@@ -76,17 +78,44 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'tiktok',
+#         'USER': 'tiktok_db_user',
+#         'PASSWORD': 'tiktok_db_password',
+#         'HOST': 'localhost',  # Set to the MySQL server host
+#         'PORT': '3306',       # Set to the MySQL server port (default is 3306)
+        
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tiktok',
         'USER': 'tiktok_db_user',
-        'PASSWORD': 'tiktok_db_password',
-        'HOST': 'localhost',  # Set to the MySQL server host
+        'PASSWORD': '(3UtVeGdqthZCDqJ',
+        'HOST': '172.122.0.236',  # Set to the MySQL server host 24.240.132.86  140.232.174.181
         'PORT': '3306',       # Set to the MySQL server port (default is 3306)
     }
 }
 
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',  # Set to 'DEBUG' for detailed query information
+#         },
+#     },
+# }
 
 
 # Password validation
@@ -113,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'America/New_York'
 
 USE_I18N = True
 

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate Access Key</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: white;
+            height: max-content;
+            width: max-content;
+            border: 3px solid darkblue;
+            margin: 15px auto;
+            padding: 15px;
+        }
+        h2 {
+            color: black;
+            text-align: center;
+            margin: 15px;
+        } 
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .form_class {
+            text-align: center;
+        }
+
+        .response {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            color: #4caf50;
+            background-color: #dff0d8;
+        }
+        .error {
+            color: #a94442;
+            background-color: #f2dede;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate Access Keys</h1>
+    <div class="form_class">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Generate</button>
+        </form>
+    </div>
+    
+
+    {% if generated_keys %}
+        <h2 style="text-align: left;">Access Keys</h2>
+        <ul>
+            {% for key in generated_keys %}
+                <li>{{ key }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

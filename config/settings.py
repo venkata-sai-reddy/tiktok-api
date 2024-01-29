@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-+^8grw88rtdsncbd6y5kw&1gwu-_b=k37!3()@$v#_ne&8lcg0
 DEBUG = True
 
 # ALLOWED_HOSTS = ['140.232.174.181', '24.240.132.86', 'localhost']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '6d0c-24-240-132-86.ngrok-free.app']
 
 
 # Application definition
@@ -78,28 +78,29 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'tiktok',
-#         'USER': 'tiktok_db_user',
-#         'PASSWORD': 'tiktok_db_password',
-#         'HOST': 'localhost',  # Set to the MySQL server host
-#         'PORT': '3306',       # Set to the MySQL server port (default is 3306)
-        
-#     }
-# }
-
+# Local Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tiktok',
         'USER': 'tiktok_db_user',
-        'PASSWORD': '(3UtVeGdqthZCDqJ',
-        'HOST': '172.122.0.236',  # Set to the MySQL server host 24.240.132.86  140.232.174.181
+        'PASSWORD': 'tiktok_db_password',
+        'HOST': 'localhost',  # Set to the MySQL server host
         'PORT': '3306',       # Set to the MySQL server port (default is 3306)
     }
 }
+
+# Server Database
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'tiktok',
+#         'USER': 'tiktok_db_user',
+#         'PASSWORD': '(3UtVeGdqthZCDqJ',
+#         'HOST': '140.232.174.181',  # Set to the MySQL server host 24.240.132.86  140.232.174.181
+#         'PORT': '3306',       # Set to the MySQL server port (default is 3306)
+#     }
+# }
 
 # LOGGING = {
 #     'version': 1,

@@ -12,9 +12,12 @@ from .models import VideoInfo, RegionInfo, HashtagInfo, VideoHashtagMap, Partici
 import pandas as pd
 from .serializers import VideoSerializer, VideoHashtagMapSerializer, ParticipantSerializer, SessionSerializer, AuthSerializer
 from rest_framework.parsers import JSONParser
-from .forms import YourModelForm
+from .forms import YourModelForm, GenerateAccessKeyForm
 import csv
 import re
+import random
+import string
+import pandas as pd
 from .exceptions import TiktokException
 from .utils import validate_participant_interactions, check_is_session_exists, current_time, unix_to_datetime
 
@@ -58,7 +61,7 @@ class ParticipantViewSet (
         try:
             data = JSONParser().parse(request)
             validate_participant_interactions(data)
-            video_data = VideoInfo.objects.get(video_id = data.get('video_id'))
+            video_data = VideoInfo.objects.get(video_id = "'"+data.get('video_id')+"'")
             session_data = SessionInfo.objects.get(session_id = data.get('session_id'))
             participant_interaction = ParticipantInteractions.objects.create(video_id = video_data, session_id = session_data, start_time = data.get('start_time'),
                 end_time = data.get('end_time'), is_liked = bool(data.get('is_liked')))
@@ -168,9 +171,12 @@ class DataFileUpload(View):
             csv_file = request.FILES['file_name']
             # Process CSV file and save data to the database
             try:
-                decoded_file = csv_file.read().decode('utf-8').splitlines()
-                csv_reader = csv.DictReader(decoded_file)
-                for data in csv_reader:
+                video_data = pd.read_csv(csv_file)
+                video_data.dropna(subset=['id', 'video_description', 'username', 'region_code', 'create_time', 'music_id', 'search_key',
+                 'like_count', 'view_count', 'share_count', 'comment_count'], inplace=True)
+                video_data = video_data[video_data['music_id'].notna() & (video_data['music_id'] != '') & (video_data['music_id'] != 'None')]
+
+                for index, data in video_data.iterrows():
                     region_info = RegionInfo.objects.get(region_code=data['region_code'])
                     video_duration = data['duration'] if 'duration' in data else 60
                     # Insert data into VideoInfo
@@ -225,3 +231,34 @@ class DataFileUpload(View):
                     return render(request, self.template_name, {'form': form, 'status': 'error', 'message': str(e)})
                     # return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
         return render(request, self.template_name, {'form': form, 'status': 'error', 'message': 'Invalid form submission'})
+
+
+class GeneratedAccessKeyView(View):
+    model = AuthInfo
+    template_name = 'generate_access_key.html'
+    context_object_name = 'generated_keys'
+    form_class = GenerateAccessKeyForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = GenerateAccessKeyForm(request.POST)
+        try:
+            if form.is_valid():
+                n = form.cleaned_data['n']
+                unique_keys = set()
+
+                while len(unique_keys) < n:
+                    new_key = self.generate_unique_key(6)
+                    if int(new_key) > 100000 and new_key not in unique_keys and not AuthInfo.objects.filter(access_key=new_key).exists():
+                        unique_keys.add(new_key)
+                        AuthInfo.objects.create(access_key=new_key)
+            return render(request, self.template_name, {'form': form, 'status': 'success', 'generated_keys': unique_keys})
+        except Exception as e:
+            return render(request, self.template_name, {'form': form, 'status': 'error', 'message': str(e)})
+
+    @staticmethod
+    def generate_unique_key(length):
+        return ''.join(random.choices(string.digits, k=length))

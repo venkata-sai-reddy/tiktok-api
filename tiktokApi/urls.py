@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework import routers
-from .views import VideoViewSet, ParticipantViewSet, SessionViewSet, DataFileUpload
+from .views import VideoViewSet, ParticipantViewSet, SessionViewSet, DataFileUpload, GeneratedAccessKeyView
 
 router = routers.DefaultRouter()
 router.register(r'videos', VideoViewSet, basename='video_list')
@@ -10,5 +10,6 @@ urlpatterns = router.urls
 
 urlpatterns += [
     path('save/data-upload/', DataFileUpload.as_view(), name='video-data-csv'),
+    path('generate/keys/', GeneratedAccessKeyView.as_view(), name='generate_ids'),
 
 ]

@@ -9,6 +9,7 @@ djangorestframework = "*"
 pymango = "*"
 django-cors-headers = "*"
 mysqlclient = "*"
+pyngrok="5.0.5"
 
 [dev-packages]
 

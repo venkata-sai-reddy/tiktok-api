@@ -35,6 +35,7 @@ class HashtagInfo(models.Model):
         return f"HashtagId: {self.hashtag_id}\n Name: {self.hashtag_name}"
 
 class VideoHashtagMap(models.Model):
+    uniq_id = models.AutoField(primary_key=True)
     video_id = models.ForeignKey(VideoInfo, db_column="video_id", on_delete=models.CASCADE)
     hashtag_id = models.ForeignKey(HashtagInfo, db_column="hashtag_id", on_delete=models.CASCADE)
     
@@ -87,7 +88,7 @@ class Comments(models.Model):
         db_table = 'comment_info'
 
 class VideoInteractions(models.Model):
-    video_id = models.ForeignKey(VideoInfo, db_column="video_id", on_delete= models.CASCADE)
+    video_id = models.ForeignKey(VideoInfo, db_column="video_id", on_delete= models.CASCADE, primary_key=True)
     like_count = models.IntegerField(default=0, null=True)
     view_count = models.IntegerField(default=0, null=True)
     share_count = models.IntegerField(default=0, null=True)

@@ -61,7 +61,7 @@ class ParticipantViewSet (
         try:
             data = JSONParser().parse(request)
             validate_participant_interactions(data)
-            video_data = VideoInfo.objects.get(video_id = "'"+data.get('video_id')+"'")
+            video_data = VideoInfo.objects.get(video_id = data.get('video_id'))
             session_data = SessionInfo.objects.get(session_id = data.get('session_id'))
             participant_interaction = ParticipantInteractions.objects.create(video_id = video_data, session_id = session_data, start_time = data.get('start_time'),
                 end_time = data.get('end_time'), is_liked = bool(data.get('is_liked')))
@@ -181,7 +181,7 @@ class DataFileUpload(View):
                     video_duration = data['duration'] if 'duration' in data else 60
                     # Insert data into VideoInfo
                     video_info, created = VideoInfo.objects.get_or_create(
-                        video_id=data['id'],
+                        video_id=int(data['id'].replace("'", "")),
                         defaults={
                             'description': data['video_description'],
                             'user_name': data['username'],
@@ -192,7 +192,7 @@ class DataFileUpload(View):
                         }
                     )
                     # Fetching the video_info data instance from the database
-                    video_info = VideoInfo.objects.get(video_id=data['id'])
+                    video_info = VideoInfo.objects.get(video_id=data['id'].replace("'", ""))
                     # Saving the Hashtag information
                     hashtag_name = re.search(r'hashtag_name\s+([^ ]+)', data['search_key']).group(1)
                     hashtag_info, created = HashtagInfo.objects.get_or_create(hashtag_name=hashtag_name)

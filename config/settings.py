@@ -87,6 +87,9 @@ DATABASES = {
         'PASSWORD': 'tiktok_db_password',
         'HOST': 'localhost',  # Set to the MySQL server host
         'PORT': '3306',       # Set to the MySQL server port (default is 3306)
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
 
